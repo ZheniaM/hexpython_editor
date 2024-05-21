@@ -1,29 +1,18 @@
 from os import rename, remove, path
 import shutil
 
+from icecream.icecream import ic
+
 
 class HEXFileIO:
-    def __init__(self, file_name: str, directory: str | None = None) -> None:
+    def __init__(self, file_name: str) -> None:
         """
         Если папка не существует, то поднимается ошибка FileNotFoundError
         """
 
-        self.directory = directory
-        self.file_name = file_name
+        self.original = file_name
 
-        if self.directory is None:
-            self.original = file_name
-            self.tmp = file_name + ".tmp"
-            if path.isfile(file_name):
-                shutil.copyfile(self.original, self.tmp)
-            else:
-                with open(self.tmp, "w+") as _:
-                    pass
-            self.tmp_file = open(self.tmp, "r+b")
-            return
-
-        self.original = path.join(directory, file_name)
-        self.tmp = path.join(directory, file_name + ".tmp")
+        self.tmp = file_name + ".tmp"
         if path.isfile(self.original):
             shutil.copy2(self.original, self.tmp)
         else:
@@ -33,18 +22,20 @@ class HEXFileIO:
 
     def overwrite(self, start_byte: int, hex_bytes: str) -> None:
         self.tmp_file.seek(start_byte, 0)
+        ic(hex_bytes)
+        ic(bytes.fromhex(hex_bytes))
+        ic(self.tmp_file)
         self.tmp_file.write(bytes.fromhex(hex_bytes))
 
     def read(self, start_byte: int, lenght: int) -> str:
         self.tmp_file.seek(start_byte, 0)
         data = self.tmp_file.read(lenght).hex(':')
-        # if (len(data) // 2 < lenght):
-        #     data += "00" * (lenght - (len(data) // 2))
         return data
 
     def save(self) -> None:
         """
         После сохранения нужно будет снова открыть файл.
+
         Т.е. данный экземпляр класса будет бесполезен
         """
         self.tmp_file.close()
@@ -62,7 +53,7 @@ class HEXFileIO:
 
 
 if __name__ == "__main__":
-    hfio = HEXFileIO("ata.txt")  # , "test_dir")
+    hfio = HEXFileIO("ata.txt")
 
     hfio.overwrite(15, "61")
     # hfio.overwrite(2, "3432")

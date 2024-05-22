@@ -1,7 +1,7 @@
 from os import rename, remove, path
 import shutil
 
-from icecream.icecream import ic
+# from icecream.icecream import ic
 
 
 class HEXFileIO:
@@ -22,9 +22,6 @@ class HEXFileIO:
 
     def overwrite(self, start_byte: int, hex_bytes: str) -> None:
         self.tmp_file.seek(start_byte, 0)
-        ic(hex_bytes)
-        ic(bytes.fromhex(hex_bytes))
-        ic(self.tmp_file)
         self.tmp_file.write(bytes.fromhex(hex_bytes))
 
     def read(self, start_byte: int, lenght: int) -> str:

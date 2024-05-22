@@ -11,6 +11,7 @@ class HEXFileIO:
         """
 
         self.original = file_name
+        self.is_chaged = False
 
         self.tmp = file_name + ".tmp"
         if path.isfile(self.original):
@@ -23,6 +24,7 @@ class HEXFileIO:
     def overwrite(self, start_byte: int, hex_bytes: str) -> None:
         self.tmp_file.seek(start_byte, 0)
         self.tmp_file.write(bytes.fromhex(hex_bytes))
+        self.is_chaged = True
 
     def read(self, start_byte: int, lenght: int) -> str:
         self.tmp_file.seek(start_byte, 0)

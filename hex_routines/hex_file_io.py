@@ -1,7 +1,7 @@
 from os import rename, remove, path
 import shutil
 
-# from icecream.icecream import ic
+from icecream.icecream import ic
 
 
 class HEXFileIO:
@@ -22,13 +22,26 @@ class HEXFileIO:
         self.tmp_file = open(self.tmp, "r+b")
 
     def overwrite(self, start_byte: int, hex_bytes: str) -> None:
+        if 1 & len(hex_bytes):
+            hex_bytes += "0"
         self.tmp_file.seek(start_byte, 0)
         self.tmp_file.write(bytes.fromhex(hex_bytes))
         self.is_chaged = True
 
-    def insert_empty_cell(self, position: int) -> None:
-        self.tmp_file.seek(position, 0)
-        self.tmp_file.write(b'\x00')
+    def insert(self, start_byte: int, hex_bytes: str) -> None:
+        self.tmp_file.seek(start_byte)
+        if 1 & len(hex_bytes):
+            hex_bytes += "0"
+        size = len(hex_bytes) // 2
+        pos_to_write = start_byte
+        old = self.tmp_file.read(size)
+        new = bytes.fromhex(hex_bytes)
+        while len(new):
+            self.tmp_file.seek(pos_to_write)
+            self.tmp_file.write(new)
+            new = old
+            old = self.tmp_file.read(size)
+            pos_to_write += size
         self.is_chaged = True
 
     def read(self, start_byte: int, lenght: int) -> str:
@@ -58,11 +71,16 @@ class HEXFileIO:
 
 if __name__ == "__main__":
     hfio = HEXFileIO("ata.txt")
-
-    hfio.overwrite(15, "61")
+    remove(hfio.original)
+    hfio = HEXFileIO("ata.txt")
+    ic(len(hfio))
+    ic(hfio.read(0, 20))
+    hfio.overwrite(0, "000102030405060708090A0B0C0D0E0F")
+    ic(hfio.read(0, 20))
+    hfio.insert(8, "11223")
     # hfio.overwrite(2, "3432")
 
-    print(hfio.read(0, 4))
-    print(len(hfio))
+    ic(len(hfio))
+    ic(hfio.read(0, len(hfio)))
 
     hfio.save()

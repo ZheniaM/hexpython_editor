@@ -12,6 +12,7 @@ class HexTable(QTableWidget):
         super().__init__(parrent)
         self.file = file
         size = len(self.file)
+        self.is_insert_mode = False
         # ic(size)
         self.__len_of_strings = 1 + (size >> 4)
         self.setColumnCount(16 + 1 + 1)
@@ -60,18 +61,20 @@ class HexTable(QTableWidget):
                 return
             # ic("changed", cell.row(), cell.column())
             text = cell.text()
-            if 2 != len(text):
-                self.__cell_undo(cell)
-                return
-            a, b = text
-            if a not in HexTable.hexdigits or b not in HexTable.hexdigits:
-                self.__cell_undo(cell)
-                return
             y, x = cell.row(), cell.column()
-            # ic(y * 16 + x)
-            self.file.overwrite(y * 16 + x, text)
-            self.__init_hex_table_row(y)
-            # ic("changed")
+            pos = y * 16 + x
+            if all([x not in HexTable.hexdigits for x in text]):
+                self.__cell_undo(cell)
+                return
+
+            if self.is_insert_mode:
+                self.file.insert(pos, text)
+            else:
+                for i in range(0, len(text), 2):
+                    self.file.overwrite(pos + (i // 2), text[i:i+2])
+            while y < self.rowCount():
+                self.__init_hex_table_row(y)
+                y += 1
         finally:
             self.itemChanged.connect(self.__cell_changed)
 
@@ -94,3 +97,7 @@ class HexTable(QTableWidget):
     def __cell_undo(self, cell: QTableWidgetItem) -> None:
         y, x = cell.row(), cell.column()
         cell.setText(self.file.read(y * 16 + x, 1))
+
+    def keyPressEvent(self, event) -> None:
+        if event.key() == Qt.Key.Key_I:
+            self.is_insert_mode = not self.is_insert_mode

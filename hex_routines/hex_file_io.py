@@ -26,6 +26,11 @@ class HEXFileIO:
         self.tmp_file.write(bytes.fromhex(hex_bytes))
         self.is_chaged = True
 
+    def insert_empty_cell(self, position: int) -> None:
+        self.tmp_file.seek(position, 0)
+        self.tmp_file.write(b'\x00')
+        self.is_chaged = True
+
     def read(self, start_byte: int, lenght: int) -> str:
         self.tmp_file.seek(start_byte, 0)
         data = self.tmp_file.read(lenght).hex(':')

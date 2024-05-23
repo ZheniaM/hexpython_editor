@@ -75,6 +75,22 @@ class HexTable(QTableWidget):
         finally:
             self.itemChanged.connect(self.__cell_changed)
 
+    def insert_empty_cell_and_shift(self, row: int, column: int) -> None:
+        start_byte = row * 16 + column
+        self.file.insert_empty_cell(start_byte)
+        self.__init_hex_table_row(row)
+        self.__init_hex_table_row(row + 1)
+        self.setCurrentCell(row + 1, 0)
+
+        if row < self.rowCount() - 1:
+            for r in range(self.rowCount() - 1, row + 1, -1):
+                for c in range(16, 0, -1):
+                    item = self.item(r - 1, c - 1)
+                    if item:
+                        text = item.text()
+                        item = QTableWidgetItem(text)
+                        self.setItem(r, c, item)
+
     def __cell_undo(self, cell: QTableWidgetItem) -> None:
         y, x = cell.row(), cell.column()
         cell.setText(self.file.read(y * 16 + x, 1))

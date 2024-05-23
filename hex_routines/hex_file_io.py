@@ -24,8 +24,13 @@ class HEXFileIO:
     def overwrite(self, start_byte: int, hex_bytes: str) -> None:
         if 1 & len(hex_bytes):
             hex_bytes += "0"
-        self.tmp_file.seek(start_byte, 0)
+        self.tmp_file.seek(start_byte)
         self.tmp_file.write(bytes.fromhex(hex_bytes))
+        self.is_chaged = True
+
+    def insert_empty_cell(self, pos: int) -> None:
+        self.tmp_file.seek(pos)
+        self.tmp_file.write(b'\00')
         self.is_chaged = True
 
     def insert(self, start_byte: int, hex_bytes: str) -> None:

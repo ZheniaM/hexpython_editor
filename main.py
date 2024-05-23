@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import (QMainWindow,
                              QApplication,
                              QMenu,
                              QFileDialog)
-# from PyQt5 import Qt
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QKeyEvent
 from dialogs.save_dialog import SaveDialog
 
 from icecream.icecream import ic
@@ -25,6 +26,18 @@ class Editor(QMainWindow):
         self.__init_menu_bar()
 
         self.setCentralWidget(self.__hex_table)
+        self.__update_status_bar()
+
+    def __update_status_bar(self) -> None:
+        insert = self.__hex_table.is_insert_mode
+        self.statusBar().showMessage(("--REPLACE--", "--INSERT--")[insert])
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if event.key() == Qt.Key.Key_Insert:
+            ic("'insert' is pressed")
+            insert = not self.__hex_table.is_insert_mode
+            self.__hex_table.is_insert_mode = insert
+            self.__update_status_bar()
 
     def __init_menu_bar(self) -> None:
         menu_bar = self.menuBar()

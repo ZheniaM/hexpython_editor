@@ -72,6 +72,7 @@ class HexTable(QTableWidget):
             else:
                 for i in range(0, len(text), 2):
                     self.file.overwrite(pos + (i // 2), text[i:i+2])
+            self.setRowCount(1 + (len(self.file) >> 4))
             while y < self.rowCount():
                 self.__init_hex_table_row(y)
                 y += 1
@@ -97,7 +98,3 @@ class HexTable(QTableWidget):
     def __cell_undo(self, cell: QTableWidgetItem) -> None:
         y, x = cell.row(), cell.column()
         cell.setText(self.file.read(y * 16 + x, 1))
-
-    def keyPressEvent(self, event) -> None:
-        if event.key() == Qt.Key.Key_I:
-            self.is_insert_mode = not self.is_insert_mode
